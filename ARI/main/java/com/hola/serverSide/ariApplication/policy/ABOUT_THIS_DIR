@@ -1,0 +1,16 @@
+This directory holds all the code related to the Policy part of the ARI application.
+
+When the system initializes:
+
+1. A time collections file is read in
+2. A user collection file is read in
+3. A group collection file is read in
+4. The policies are then read in
+
+As and when the policies are read in, a List <Policy> is created.
+
+Policy:
+  PolicyCondition
+  PolicyAction
+
+These policies re created in the stack with no context. The context is supplied at runtime.

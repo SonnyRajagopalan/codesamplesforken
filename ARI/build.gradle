@@ -1,0 +1,126 @@
+import java.text.SimpleDateFormat
+import java.util.Date
+// The following is needed for colored output
+import org.gradle.logging.StyledTextOutput;
+import org.gradle.logging.StyledTextOutputFactory;
+import static org.gradle.logging.StyledTextOutput.Style;
+
+def getCurrentTimestamp () {
+  Date today = new Date ()
+  SimpleDateFormat df = new SimpleDateFormat ("MM-dd-yyyy_hh-mm")
+  return df.format (today)
+}
+
+def styledOutput = services.get (StyledTextOutputFactory).create ("ariApplication")
+
+apply plugin: 'java'
+//apply plugin: 'eclipse' // Only needed when you need to debug with eclipse
+
+repositories {
+  mavenCentral()
+}
+
+// Was needed for compiling source directory by source directory...
+/*
+sourceSets
+{
+  main 
+  {
+    java
+    {
+      srcDirs = [
+	"src/main/java/com/hola/serverSide/ariApplication/wsclient/", 
+	"src/main/java/com/hola/serverSide/ariApplication/common/",
+	"src/main/java/com/hola/serverSide/ariApplication/db/",
+	"src/main/java/com/hola/serverSide/ariApplication/call/",
+	"src/main/java/com/hola/serverSide/ariApplication/csm/",
+	"src/main/java/com/hola/serverSide/ariApplication/policy/",
+	"src/main/java/com/hola/serverSide/ariApplication/ari/",
+	"src/main/java/com/hola/serverSide/ariApplication/init/"
+      ]
+    }
+  }
+}
+*/
+dependencies {
+  // For Log4J setup over SLF4J, check https://logging.apache.org/log4j/2.0/faq.html#which_jars
+  compile 'org.slf4j:slf4j-api:1.7.16' // Added 02-22-2016
+  //compile 'org.slf4j:slf4j-api:1.7.12' // removed on 02-22-2016 (see above)
+  compile 'org.slf4j:slf4j-log4j12:1.7.16' // Added 02-22-2016
+  //compile 'org.slf4j:slf4j-log4j12:1.7.12' // removed on 02-22-2016 (see above)
+  compile 'org.apache.logging.log4j:log4j:2.5' // Added 02-22-2016
+  //compile 'log4j:log4j:1.2.17' // removed on 02-22-2016 (see above)
+  compile 'com.sun.jersey:jersey-client:1.19'
+  compile 'org.glassfish.jersey.core:jersey-common:2.22.1'
+  //compile 'org.slf4j:slf4j-simple:1.7.12'
+  compile 'org.apache.commons:commons-lang3:3.4'
+  compile 'com.fasterxml.jackson.core:jackson-core:2.4.6'
+  compile 'com.fasterxml.jackson.core:jackson-databind:2.4.6'
+  compile 'com.fasterxml.jackson.core:jackson-annotations:2.4.6'
+  compile 'javax:javaee-api:7.0'
+  compile 'javax.websocket:javax.websocket-api:1.1'
+  compile 'org.glassfish.tyrus.bundles:tyrus-standalone-client:1.12'
+  compile 'commons-dbutils:commons-dbutils:1.6'
+  compile 'com.zaxxer:HikariCP-parent:2.3.10'
+  compile 'com.zaxxer:HikariCP:2.4.1'
+  compile 'mysql:mysql-connector-java:5.1.38'
+}
+compileJava {
+  options.compilerArgs << '-Xlint:unchecked,deprecation'
+}
+
+jar.doFirst {
+  ant.buildnumber()
+  manifest {
+    attributes(
+      'Implementation-Version': ant.antProject.properties['build.number']
+    )
+  }
+}
+
+jar {
+  from configurations.runtime
+  manifest {
+    if (project.hasProperty ('jarDir'))
+    {
+      styledOutput.withStyle (Style.Info).println ('\t+-------------------------------------------------------+')
+      styledOutput.withStyle (Style.Info).println ('\t|                                                       |')
+      styledOutput.withStyle (Style.Info).println ('\t| jarDir specified:' + jarDir)
+      styledOutput.withStyle (Style.Info).println ('\t|                                                       |')
+      styledOutput.withStyle (Style.Info).println ('\t+-------------------------------------------------------+')
+      attributes ('Main-Class': 'com.hola.serverSide.ariApplication.init.ARIInit',
+		  //'Class-Path': configurations.runtime.files.collect { "/opt/hola/jars/$it.name" }.join(' ') 
+		  'Class-Path': configurations.runtime.files.collect { jarDir+"/$it.name" }.join(' '),
+		 )
+    }
+    else
+    {
+      styledOutput.withStyle (Style.Info).println ('\t+-------------------------------------------------------+')
+      styledOutput.withStyle (Style.Info).println ('\t|                                                       |')
+      styledOutput.withStyle (Style.Info).println ('\t| NO jarDir specified, using /shoshone/hola/local/jars/ |')
+      styledOutput.withStyle (Style.Info).println ('\t|                                                       |')
+      styledOutput.withStyle (Style.Info).println ('\t+-------------------------------------------------------+')
+      attributes ('Main-Class': 'com.hola.serverSide.ariApplication.init.ARIInit',
+		  //'Class-Path': configurations.runtime.files.collect { "/opt/hola/jars/$it.name" }.join(' ') 
+		  'Class-Path': configurations.runtime.files.collect { "/shoshone/hola/local/jars/"+"$it.name" }.join(' '),
+		 )
+    }
+  }
+}
+
+task backup (type: Tar) {
+  from 'src/', 'build.gradle'
+  destinationDir = new File ("/projects/hola/ari/")
+  compression = Compression.GZIP
+  if (project.hasProperty ('tarTag'))
+     {
+       baseName 'ariBackup-'+tarTag
+     }
+     else
+     {
+       baseName 'ariBackup'		
+     }
+     classifier getCurrentTimestamp ()
+     extension 'tgz'
+}
+

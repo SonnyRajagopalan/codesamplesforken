@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<web-app
+    xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd"
+    metadata-complete="false"
+    version="3.1">
+
+  <!-- A completely unnecessary web.xml, deprecated when we moved to modifyHandshake () based authentication. -->
+
+  <!-- <login-config> -->
+  <!--   <auth-method>BASIC</auth-method> -->
+  <!--   <realm-name>HolaRealm</realm-name> -->
+  <!-- </login-config> -->
+
+  <!-- <servlet> -->
+  <!--   <servlet-name>APPI initialization</servlet-name> -->
+  <!--   <servlet-class>com.hola.serverSide.appInterface.init.APPIInit</servlet-class> -->
+  <!--   <load-on-startup>1</load-on-startup> -->
+  <!-- </servlet> -->
+  <!-- <security-constraint> -->
+  <!--   <web-resource-collection> -->
+  <!--     <web-resource-name>APPIServer</web-resource-name> -->
+  <!--     <url-pattern>/appInterface/v_0/appi</url-pattern> -->
+  <!--   </web-resource-collection> -->
+    <!-- <auth-constraint> -->
+    <!--   <role-name>server-administrator</role-name> -->
+    <!-- </auth-constraint> -->
+  <!-- </security-constraint> -->
+<filter-mapping>
+    <filter-name>StormpathFilter</filter-name>
+    <url-pattern>/*</url-pattern>
+</filter-mapping>
+
+</web-app>

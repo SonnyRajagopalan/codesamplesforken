@@ -1,0 +1,11 @@
+This directory holds all the DB access related classes.
+
+As of this writing, the following DBs are needed:
+
+(a) A contacts DB, which is basically how Hola keeps the contact information
+(b) A current call DB, which is where transient information regarding ongoing
+    calls are kept.
+(c) Billing and charging DB, which is where total minutes consumed etc. for
+    each contact is kept.
+(d) A call data record, which is where each contact's call duration, and other
+    information (such as who the contact was talking to etc.) is kept.
